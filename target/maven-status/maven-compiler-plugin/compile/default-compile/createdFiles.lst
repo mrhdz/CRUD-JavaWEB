@@ -1,0 +1,9 @@
+controladores\VehiculoController.class
+modelosDAO\MantenimientoDAO.class
+modelosDAO\VehiculoDAO.class
+com\mycompany\luishernandezexaprac2\resources\JakartaEE10Resource.class
+com\mycompany\luishernandezexaprac2\JakartaRestConfiguration.class
+controladores\MantenimientoController.class
+modelos\Vehiculo.class
+otros\cn.class
+modelos\Mantenimiento.class
