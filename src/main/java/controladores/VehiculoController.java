@@ -4,6 +4,7 @@
  */
 package controladores;
 
+import com.google.gson.Gson;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,13 +17,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import modelos.Mantenimiento;
 import modelos.Vehiculo;
+import modelosDAO.MantenimientoDAO;
 import modelosDAO.VehiculoDAO;
 
-/**
- *
- * @author MINEDUCYT
- */
 @WebServlet(name = "VehiculoController", urlPatterns = {"/vehiculos"})
 public class VehiculoController extends HttpServlet {
 
@@ -42,12 +41,13 @@ public class VehiculoController extends HttpServlet {
             out.println("</html>");
         }
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
         VehiculoDAO vehiculoDAO = new VehiculoDAO();
+        MantenimientoDAO mantenimientoDAO = new MantenimientoDAO();
 
         if (action != null) {
             switch (action) {
@@ -62,6 +62,16 @@ public class VehiculoController extends HttpServlet {
                     id = Integer.parseInt(request.getParameter("id"));
                     vehiculoDAO.eliminar(id);
                     response.sendRedirect("vehiculos");
+                    break;
+                case "verMantenimientos":
+                    id = Integer.parseInt(request.getParameter("id"));
+                    ArrayList<Mantenimiento> listaMantenimientos = mantenimientoDAO.obtenerMantenimientosPorVehiculoId(id);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
+                    PrintWriter out = response.getWriter();
+                    Gson gson = new Gson(); // es importante agregar la dependecia Gson
+                    out.print(gson.toJson(listaMantenimientos));
+                    out.flush();
                     break;
                 default:
                     break;

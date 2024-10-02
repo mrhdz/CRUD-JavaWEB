@@ -79,8 +79,10 @@
                                         <td class='align-middle text-center'>${vehiculo.getModelo()}</td>
                                         <td class='align-middle text-center'>${vehiculo.getAnio()}</td>
                                         <td class='align-middle text-center'>
+                                            <button type="button" data-bs-toggle="modal" data-bs-target="#mantenimientosModal" class="btn btn-info btn-sm" onclick="verMantenimientos(${vehiculo.getId()})"><i class="fa-solid fa-eye"></i>  Ver Mantenimientos</button>
                                             <a href="vehiculos?action=edit&id=${vehiculo.getId()}" class="btn btn-warning btn-sm"><i class='fa-solid fa-pen-to-square'></i>  Editar</a>
                                             <a href="vehiculos?action=delete&id=${vehiculo.getId()}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este vehículo?')"><i class='fa-solid fa-trash-can'></i>  Eliminar</a>
+
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -93,13 +95,84 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
                 integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
         crossorigin="anonymous"></script>
-
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
                 integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+        <!-- Modal -->
+        <div class="modal fade" id="mantenimientosModal" tabindex="-1" aria-labelledby="mantenimientosModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mantenimientosModalLabel">Mantenimientos del Vehículo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table id="mantenimientosTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Costo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mantenimientosTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            
+            function verMantenimientos(idVehiculo) {
+                // console.log("ID del vehículo recibido:", idVehiculo);  // Verificar que el ID del vehículo es correcto
+
+                // Concatenamos la URL con el ID del vehículo
+                var url = "/LuisHernandezExaPrac2/mantenimientos?action=verMantenimientos&id=" + idVehiculo;
+                /// console.log("URL generada:", url);  // Verificar que la URL es correcta
+
+                // Realizamos la solicitud fetch
+                fetch(url)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error("Error en la respuesta de la red");
+                        }
+                        return response.json();  // Convertimos la respuesta a JSON
+                    })
+                    .then(function(mantenimientos) {
+                        console.log("Datos de mantenimientos recibidos:", mantenimientos); // Verifica los datos recibidos
+                        var tableBody = document.getElementById('mantenimientosTableBody');
+                        tableBody.innerHTML = '';  // Limpiamos la tabla antes de agregar nuevos datos
+
+                        // Verificamos si hay mantenimientos para mostrar
+                        if (mantenimientos.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No hay mantenimientos registrados para este vehículo.</td></tr>';
+                        } else {
+                            // Iteramos sobre los mantenimientos y los añadimos a la tabla
+                            mantenimientos.forEach(function(mantenimiento) {
+                                var row = '<tr>' +
+                                            '<td>' + mantenimiento.id + '</td>' +
+                                            '<td>' + mantenimiento.fecha + '</td>' +
+                                            '<td>' + mantenimiento.costo + '</td>' +
+                                          '</tr>';
+                                tableBody.innerHTML += row;  // Añadimos la fila a la tabla
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error("Hubo un problema con la solicitud Fetch:", error);
+                    });
+            }
+        </script>
+        
+        <!-- Data Table-->
         <script>
             $(document).ready(function () {
                 $('#vehiculos-table').DataTable({

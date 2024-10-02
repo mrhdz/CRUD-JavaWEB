@@ -70,6 +70,36 @@ public class MantenimientoDAO {
         return mantenimiento;
     }
 
+    public ArrayList<Mantenimiento> obtenerMantenimientosPorVehiculoId(int idVehiculo) {
+        ArrayList<Mantenimiento> consulta = new ArrayList<>();
+        String sql = "SELECT m.*, v.MarcaVehiculo, v.ModeloVehiculo "
+                + "FROM mantenimiento m "
+                + "INNER JOIN vehiculos v ON m.VehiculoID = v.IDVehiculo "
+                + "WHERE m.VehiculoID = ? "
+                + "ORDER BY m.FechaMantenimiento DESC LIMIT 100"; // Ajusta el límite según tus necesidades
+
+        try (Connection con = CN.getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idVehiculo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Mantenimiento mantenimiento = new Mantenimiento();
+                    mantenimiento.setId(rs.getInt("IDMantenimiento"));
+                    mantenimiento.setFecha(rs.getString("FechaMantenimiento"));
+                    mantenimiento.setCosto(rs.getDouble("Costo"));
+                    mantenimiento.setId_vehiculo(rs.getInt("VehiculoID"));
+                    mantenimiento.setMarca_vehiculo(rs.getString("MarcaVehiculo"));
+                    mantenimiento.setModelo_vehiculo(rs.getString("ModeloVehiculo"));
+                    consulta.add(mantenimiento);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener mantenimientos por vehiculo ID: " + e.getMessage());
+            e.printStackTrace(); // Considera usar un sistema de logging más robusto
+        }
+
+        return consulta;
+    }
+
     public boolean agregar(Mantenimiento mantenimiento) throws SQLException {
         String sql = "INSERT INTO mantenimiento(FechaMantenimiento, VehiculoID, Costo) VALUES (?, ?, ?)";
         try {

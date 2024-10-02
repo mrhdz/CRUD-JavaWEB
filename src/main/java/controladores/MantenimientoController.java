@@ -1,5 +1,6 @@
 package controladores;
 
+import com.google.gson.Gson;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,8 +37,8 @@ public class MantenimientoController extends HttpServlet {
             out.println("</html>");
         }
     }
-    
-@Override
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -63,6 +64,34 @@ public class MantenimientoController extends HttpServlet {
                     mantenimientoDAO.eliminar(id);
                     response.sendRedirect("mantenimientos");
                     break;
+                case "verMantenimientos":
+                    try {
+                        id = Integer.parseInt(request.getParameter("id"));
+                        ArrayList<Mantenimiento> listaMantenimientos = mantenimientoDAO.obtenerMantenimientosPorVehiculoId(id);
+
+                        // Imprimir la lista en consola
+                        System.out.println("Mantenimientos devueltos: " + listaMantenimientos);
+
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+
+                        PrintWriter out = response.getWriter();
+                        Gson gson = new Gson();
+
+                        // Verificamos si hay mantenimientos
+                        if (listaMantenimientos.isEmpty()) {
+                            System.out.println("No hay mantenimientos registrados para el vehículo con ID: " + id);
+                        }
+
+                        // Enviamos la respuesta
+                        out.print(gson.toJson(listaMantenimientos));
+                        out.flush();
+                    } catch (Exception e) {
+                        e.printStackTrace(); // Captura cualquier excepción y la imprime
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar la solicitud");
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -140,11 +169,11 @@ public class MantenimientoController extends HttpServlet {
                 request.getRequestDispatcher("agregarmantenimiento.jsp").forward(request, response);
             }*/
         }
-        
+
         // redigir a mantenimientos
         response.sendRedirect("mantenimientos");
     }
-    
+
     @Override
     public String getServletInfo() {
         return "Short description";
